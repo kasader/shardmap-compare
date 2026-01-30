@@ -8,9 +8,10 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Diarkis/diarkis/smap"
+	"github.com/kasader/shardmap-compare"
 	cmap "github.com/orcaman/concurrent-map"
 	"github.com/tidwall/lotsa"
-	"github.com/tidwall/shardmap"
 )
 
 func randKey(rnd *rand.Rand, n int) string {
@@ -170,5 +171,30 @@ func main() {
 	})
 
 	println()
+
+	println("-- github.com/Diarkis/diarkis --")
+	smap := smap.New()
+	print("set: ")
+	lotsa.Ops(N, runtime.NumCPU(), func(i, _ int) {
+		smap.Set(keys[i], i)
+	})
+
+	print("get: ")
+	lotsa.Ops(N, runtime.NumCPU(), func(i, _ int) {
+		v, _ := smap.Get(keys[i])
+		if v.(int) != i {
+			panic("bad news")
+		}
+	})
+	print("rng:       ")
+	lotsa.Ops(100, runtime.NumCPU(), func(i, _ int) {
+		smap.Range(func(key string, value interface{}) {
+			/* ...? */
+		})
+	})
+	print("del: ")
+	lotsa.Ops(N, runtime.NumCPU(), func(i, _ int) {
+		smap.Remove(keys[i])
+	})
 
 }
